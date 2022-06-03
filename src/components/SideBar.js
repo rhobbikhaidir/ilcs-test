@@ -12,7 +12,7 @@ const SideBar = (props) => {
       </div>
       <div className='text-lg text-gray-800 pl-10 py-4'>
 
-      <button onClick={props.onClick}>
+      <button onClick={props.onClick} disabled={props.disabled}>
         Barang
       </button>
       </div>

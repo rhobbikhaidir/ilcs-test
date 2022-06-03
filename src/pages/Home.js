@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
 
-const npIsValid = (value) => value.trim().length >= 16;
+const npIsValid = (value) => value.trim().length >= 14;
 const nameIsValid = (value) => value.trim() !== "";
 
 const Home = () => {
@@ -51,6 +51,7 @@ const Home = () => {
   const getRegions = (data) => {
     data = data?.data?.map((d) => {
       return {
+        // labelForAutoComplete INPUT
         label: d.ur_negara,
         ...d,
       };
@@ -61,6 +62,7 @@ const Home = () => {
   const getHarbors = (data) => {
     data = data?.data?.map((d, index) => {
       return {
+        // labelForAutoComplete INPUT
         id: index,
         label: d.ur_pelabuhan,
         ...d,
@@ -92,6 +94,13 @@ const Home = () => {
     }
   }, [kdCountry, destination]);
 
+  let formIsValid = false;
+
+  if(npwpValue.length >= 7 && name.length >= 5 ) {
+    formIsValid = true;
+
+  }
+
   const getAllData = (e) => {
     e.preventDefault();
     const checkData = { kdCountry, destination, name, npwpValue, transaction };
@@ -106,30 +115,30 @@ const Home = () => {
 
   return (
     <div className="flex flex-row m-10 h-screen">
-      <SideBar onClick={getAllData} />
+      <SideBar onClick={getAllData} disable={formIsValid} />
       <div className="border border-gray-400 w-3/4">
         <form className="flex flex-row m-10">
           <div>
-            <p htmlFor="npwp" className="mb-10">
+            <p htmlFor="npwp" className="my-5">
               NPWP
             </p>
-            <p htmlFor="nama" className="mb-10">
+            <p htmlFor="nama" className=" my-10">
               NAMA
             </p>
-            <p htmlFor="transaksi" className="mb-10">
+            <p htmlFor="transaksi" className=" my-12 ">
               TRANSAKSI
             </p>
-            <p htmlFor="negaraTujuan" className="mb-10">
+            <p htmlFor="negaraTujuan" className=" my-14">
               NEGARA {transaction === "export" ? "TUJUAN" : "ASAL"}
             </p>
-            <p htmlFor="pelabuhanTujuan" className="mb-10">
+            <p htmlFor="pelabuhanTujuan" className=" ">
               PELABUHAN TUJUAN
             </p>
           </div>
           <div className="flex flex-col ml-20">
             {npwpHasError && (
               <p className="text-red-400">
-                Please Enter Valid Npwp (min 16 Digit)
+                Please Enter Valid Npwp (max 16 Digit)
               </p>
             )}
             <input

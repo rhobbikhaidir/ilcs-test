@@ -10,17 +10,15 @@ const priceIsValid = (value) => value.trim().length >= 2;
 
 const Barang = () => {
   const navigate = useNavigate();
-  // const allData = useSelector((state) => state.allData);
+  const transactionType = useSelector((state) => state.allData.transaction);
   const [hsCodeData, setHsCodeData] = useState([]);
   const [hasCodeFormat, setHasCodeFormat] = useState(null);
   const [trfData, setTrfData] = useState({
-    hsCode: "",
-    bm: "",
-    ppnbm: "",
-    bk: "",
-    ppnbk: "",
+    tarif: "",
+    ppn: "",
   });
 
+  const [totalHarga, setTotalHarga] = useState("")
   const [uraianHsCode, setUraianHsCode] = useState("");
   const [subHeaderHsCode, setSubHeaderHsCode] = useState("");
 
@@ -50,35 +48,47 @@ const Barang = () => {
       setUraianHsCode(d.uraian_id);
       return null;
     });
-    console.log("test res hsCode", res);
     setHsCodeData(res);
   };
 
   const getTrf = (data) => {
     const response = data.data;
-    response?.map((res) =>
-      setTrfData({
-        hsCode: res.hs_code,
-        bm: res.bm,
-        ppnbm: res.ppnbm,
-        bk: res.bk,
-        ppnbk: res.ppnbk,
-      })
-    );
-    console.log(trfData);
+    response?.map((res) => {
+      if(transactionType === "export") {
+        setTrfData({
+          tarif: res.bk,
+          ppn: res.ppnbk
+        });
+      } else if(transactionType === 'import') {
+        setTrfData({
+          tarif: res.bm,
+          ppn: res.ppnbm
+        });
+      } else {
+        setTrfData({
+          ...trfData,
+        })
+      }
+      return null;
+    });
   };
 
   useEffect(() => {
-    if (trfData) {
-      const totalHarga =
-        +hgBarangVal +
-        +trfData.bk * +hgBarangVal +
-        +trfData.ppnbk * +hgBarangVal;
-      console.log(totalHarga);
-    }
+    console.log(transactionType)
 
-    const local = localStorage.getItem("transaction");
-    console.log(local);
+    if (trfData) {
+
+      const totalPrice =
+        +hgBarangVal +
+        +trfData.tarif * +hgBarangVal +
+        +trfData.ppn * +hgBarangVal;
+        setTotalHarga(totalPrice)
+      console.log("test", totalPrice);
+    }
+    console.log(jmlBarangVal);
+    console.log(hgBarangVal);
+
+    console.log("dari APi PPN dan Tarid", trfData);
     hsCodeGetRequest(
       { url: "https://insw-dev.ilcs.co.id/n/barang?hs_code=01063300" },
       getHsCode
@@ -89,7 +99,14 @@ const Barang = () => {
         getTrf
       );
     }
-  }, [hsCodeGetRequest, trfCodeGetRequest, hasCodeFormat]);
+  }, [
+    hsCodeGetRequest,
+    trfCodeGetRequest,
+    hasCodeFormat,
+    jmlBarangVal,
+    hgBarangVal,
+    transactionType,
+  ]);
 
   const hsCodeChangeHandler = (e) => {
     setUraianHsCode(e.target.value);
@@ -116,6 +133,10 @@ const Barang = () => {
       };
     });
   };
+
+    // const onSubmit = () => {
+
+    // }
 
   const backClickHandler = () => {
     navigate("/");
@@ -175,17 +196,11 @@ const Barang = () => {
               type="text"
               id="tarif"
               onChange={trfChangeHandler}
-              value={trfData.bk}
+              value={trfData.tarif}
               className="border-2 border-teal-700 rounded px-2 mb-12"
               style={{ width: 200 }}
             />
-            <input
-              type="text"
-              placeholder="totalHarga"
-              id="totalHarga"
-              className="border-2 border-teal-700 rounded px-2 mb-11"
-              style={{ width: 200 }}
-            />
+            <p>{totalHarga ?? "total"}</p>
           </div>
           <div className="min-w-fit">
             <input
@@ -229,7 +244,7 @@ const Barang = () => {
             />
             <input
               placeholder="ppn"
-              value={trfData.ppnbk}
+              value={trfData.ppn}
               onChange={trfPpnChangeHandler}
               type="text"
               id="tarifPPN"
