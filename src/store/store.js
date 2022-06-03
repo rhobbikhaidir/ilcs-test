@@ -1,14 +1,21 @@
 import { createStore } from "redux";
 
 const initialState = {
-  allData: [],
+  homeData: [],
   region: [],
   harbor: [],
+  finalData: [],
   idCountry: "",
   transaction: "export",
 };
 
 const reducer = (state = initialState, action) => {
+  if(action.type === "submit") {
+    return{
+      ...state,
+      finalData: action.payload
+    }
+  }
   if (action.type === "idCountry") {
     return {
       ...state,
@@ -27,10 +34,10 @@ const reducer = (state = initialState, action) => {
       region: action.payload,
     };
   }
-  if (action.type === "getAllData") {
+  if (action.type === "homeData") {
     return {
       ...state,
-      allData: action.payload,
+      homeData: action.payload,
     };
   }
   if (action.type === "transaction") {

@@ -16,7 +16,7 @@ const SideBar = (props) => {
         Barang
       </button>
       </div>
-    </div>
+    </div>  
   );
 }
 

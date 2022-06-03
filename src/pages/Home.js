@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
 
-const npIsValid = (value) => value.trim().length >= 14;
+const npIsValid = (value) => value.trim().length >= 16;
 const nameIsValid = (value) => value.trim() !== "";
 
 const Home = () => {
@@ -94,19 +94,14 @@ const Home = () => {
     }
   }, [kdCountry, destination]);
 
-  let formIsValid = false;
 
-  if(npwpValue.length >= 7 && name.length >= 5 ) {
-    formIsValid = true;
-
-  }
 
   const getAllData = (e) => {
     e.preventDefault();
     const checkData = { kdCountry, destination, name, npwpValue, transaction };
     console.log(checkData);
     dispatch({
-      type: "getAllData",
+      type: "homeData",
       payload: checkData,
     });
     dispatch({type: 'transaction', payload: transaction})
@@ -115,7 +110,7 @@ const Home = () => {
 
   return (
     <div className="flex flex-row m-10 h-screen">
-      <SideBar onClick={getAllData} disable={formIsValid} />
+      <SideBar onClick={getAllData} />
       <div className="border border-gray-400 w-3/4">
         <form className="flex flex-row m-10">
           <div>
@@ -145,6 +140,7 @@ const Home = () => {
               onChange={npwpChangeHandler}
               onBlur={npwpBlurHandler}
               value={npwpValue}
+              maxLength="16"
               type="text"
               className={`border-2  ${
                 npwpHasError ? "border-red-500" : "border-gray-300"
