@@ -4,20 +4,49 @@ import Autocomplete from "@mui/material/Autocomplete";
 
 import useHttp from "../hooks/use-http";
 import useInput from "../hooks/use-input";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import SideBar from "../components/SideBar";
+
+const npIsValid = (value) => value.trim().length >= 16;
+const nameIsValid = (value) => value.trim() !== "";
 
 const Home = () => {
-  const [region, setRegion] = useState([]);
-  const [kdCountry, setKdCountry] = useState(null);
-  const [harbors, setHarbors] = useState([]);
+  const navigate = useNavigate();
 
+  // state from Redux
+  const transaction = useSelector((state) => state.transaction);
+  const harbors = useSelector((state) => state.harbor);
+  const region = useSelector((state) => state.region);
+  const dispatch = useDispatch();
+
+  // get ID
+  const [kdCountry, setKdCountry] = useState("");
+  const [destination, setDestination] = useState("");
+
+  // GET DATA using costum Hooks
   const { error: errorRegion, sendRequest: getRequestRegion } = useHttp();
   const { error: errortHarbor, sendRequest: getRequestHarbor } = useHttp();
 
+  // costum hooks for input
   const {
     value: npwpValue,
-    valueChangeHandler: npwpChangeHandler,
+    hasError: npwpHasError,
     inputBlurHandler: npwpBlurHandler,
-  } = useInput();
+    inputOnlyNumber: npwpChangeHandler,
+  } = useInput(npIsValid);
+  const {
+    value: name,
+    hasError: nameHasError,
+    inputBlurHandler: nameBlurHandler,
+    valueChangeHandler: nameChangeHandler,
+  } = useInput(nameIsValid);
+
+  const changeTransactionHandler = (e) =>
+    dispatch({ type: "transaction", payload: e.target.value });
+
+
+
 
   const getRegions = (data) => {
     data = data?.data?.map((d) => {
@@ -26,58 +55,58 @@ const Home = () => {
         ...d,
       };
     });
-    console.log(data);
-    setRegion(data);
+    dispatch({ type: "getRegion", payload: data });
   };
-  console.log("Region", region);
 
   const getHarbors = (data) => {
     data = data?.data?.map((d, index) => {
-      // console.log(index);
       return {
         id: index,
         label: d.ur_pelabuhan,
         ...d,
       };
     });
-    const id = harbors.map((har) => {
-      return har.id
-    })
-       console.log(id) 
-    setHarbors(data);
+    dispatch({ type: "getHarbor", payload: data });
   };
 
-  console.log("ini data harbors", );
-  useEffect(() => {
-    console.log(kdCountry);
+  const getDataAPIRegion = () => {
     getRequestRegion(
       { url: "https://insw-dev.ilcs.co.id/n/negara?ur_negara=IND" },
       getRegions
     );
+  };
+
+  const getDataAPIHarbor = (id) => {
+    getRequestHarbor(
+      {
+        url: `https://insw-dev.ilcs.co.id/n/pelabuhan?kd_negara=${id}`,
+      },
+      getHarbors
+    );
+  };
+
+  useEffect(() => {
+    getDataAPIRegion();
     if (kdCountry) {
-      getRequestHarbor(
-        {
-          url: `https://insw-dev.ilcs.co.id/n/pelabuhan?kd_negara=${kdCountry}`,
-        },
-        getHarbors
-      );
+      getDataAPIHarbor(kdCountry.kd_negara);
     }
-  }, [getRequestRegion, getRequestHarbor, kdCountry]);
+  }, [kdCountry, destination]);
+
+  const getAllData = (e) => {
+    e.preventDefault();
+    const checkData = { kdCountry, destination, name, npwpValue, transaction };
+    console.log(checkData);
+    dispatch({
+      type: "getAllData",
+      payload: checkData,
+    });
+    dispatch({type: 'transaction', payload: transaction})
+    navigate("/barang");
+  };
 
   return (
     <div className="flex flex-row m-10 h-screen">
-      <div className="border border-gray-400 w-1/4 mr-6 pt-10 ">
-        <p className="px=10">
-          <a href="/" className="text-lg text-gray-800 pl-10">
-            Perusahan
-          </a>
-        </p>
-        <p>
-          <a href="/barang" className="text-lg text-gray-800 pl-10">
-            Barang
-          </a>
-        </p>
-      </div>
+      <SideBar onClick={getAllData} />
       <div className="border border-gray-400 w-3/4">
         <form className="flex flex-row m-10">
           <div>
@@ -91,38 +120,55 @@ const Home = () => {
               TRANSAKSI
             </p>
             <p htmlFor="negaraTujuan" className="mb-10">
-              NEGARA TUJUAN
+              NEGARA {transaction === "export" ? "TUJUAN" : "ASAL"}
             </p>
             <p htmlFor="pelabuhanTujuan" className="mb-10">
               PELABUHAN TUJUAN
             </p>
           </div>
           <div className="flex flex-col ml-20">
-            <input 
+            {npwpHasError && (
+              <p className="text-red-400">
+                Please Enter Valid Npwp (min 16 Digit)
+              </p>
+            )}
+            <input
               onChange={npwpChangeHandler}
+              onBlur={npwpBlurHandler}
               value={npwpValue}
               type="text"
-              id="npwp"
-              className="border-2 border-teal-700 rounded px-2 mb-4 h-14"
+              className={`border-2  ${
+                npwpHasError ? "border-red-500" : "border-gray-300"
+              } rounded px-2 mb-4 h-14`}
             />
+            {nameHasError && (
+              <p className="text-red-400">Please Enter Valid Name</p>
+            )}
             <input
+              value={name}
+              onChange={nameChangeHandler}
+              onBlur={nameBlurHandler}
               type="text"
               id="nama"
-              className="border-2 border-teal-700 h-14 rounded px-2 mb-4"
+              className={`border-2  ${
+                nameHasError ? "border-red-500" : "border-gray-300"
+              } rounded px-2 mb-4 h-14`}
             />
             <select
               name="transaksi"
+              value={transaction}
               id="transaksi"
-              className="border-2 border-teal-700 h-14 rounded px-2 mb-4 bg-white"
+              onChange={changeTransactionHandler}
+              className={`border-2 border-gray-300 h-14 rounded px-2 mb-4 bg-white`}
             >
               <option value="export">EXPORT</option>
               <option value="import">IMPORT</option>
             </select>
-            {errorRegion && <p>{errorRegion}</p>}
+            {errorRegion && <p className="text-red-600">{errorRegion}</p>}
             <Autocomplete
               disablePortal
               id="combo-box-demo"
-              onChange={(e, value) => setKdCountry(value.kd_negara)}
+              onChange={(e, value) => setKdCountry(value)}
               isOptionEqualToValue={(option, value) =>
                 option.value === value.value
               }
@@ -132,12 +178,16 @@ const Home = () => {
                 <TextField {...params} label="Negara Tujuan" />
               )}
             />
-            <div style={{paddingTop: '20px'}} />
-            {errortHarbor && <p>{errortHarbor}</p>}
+            <div style={{ paddingTop: "20px" }} />
+            {errortHarbor && <p className="text-red-600"> {errortHarbor}</p>}
             <Autocomplete
-              key={harbors.id === undefined ? '' : harbors.id}
+              key={harbors.id === undefined ? "" : harbors.id}
               disablePortal
               id="combo-box-demo"
+              onChange={(e, value) => setDestination(value)}
+              isOptionEqualToValue={(option, value) =>
+                option.value === value.value
+              }
               options={harbors}
               sx={{ width: 300, height: 30 }}
               renderInput={(params) => (
