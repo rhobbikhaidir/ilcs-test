@@ -1,11 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import useHttp from "../hooks/use-http";
 
-const Page2 = () => {
+const Barang = () => {
+  const [hsCodeValue, setHsCodeValue] = useState([]);
+  const [uraianHsCode, setUraianHsCode] = useState('')
+  const [subHeaderHsCode, setSubHeaderHsCode] = useState('')
+
+  const { error: errorHsCode, sendRequest: hsCodeGetRequest } = useHttp();
+
+  const getHsCode = (data) => {
+    const uraianId = data.data.map((d) => {
+      setSubHeaderHsCode(d.sub_header)
+      setUraianHsCode(d.uraian_id)
+    })
+    setHsCodeValue(data.data);
+  };
+
+  useEffect(() => {
+    hsCodeGetRequest(
+      { url: "https://insw-dev.ilcs.co.id/n/barang?hs_code=01063300" },
+      getHsCode
+    );
+  }, [hsCodeGetRequest]);
+
+  const hsCodeChangeHandler = (e) => {
+    setUraianHsCode(e.target.value)
+  }
+
+  const subHeaderHandler = (e) => {
+    setSubHeaderHsCode(e.target.value)
+  }
+ 
   return (
     <div className="flex flex-row m-10 h-screen">
       <div className="border border-gray-400 w-1/4 mr-6 pt-10 ">
         <p>
-          {" "}
           <a href="/" className="text-lg text-gray-800 pl-10">
             Perusahan
           </a>
@@ -35,7 +64,11 @@ const Page2 = () => {
               className="border-2 border-teal-700 rounded px-2 mb-12 bg-white "
               style={{ width: 200 }}
             >
-              <option value="expor">COMBO BOX</option>
+              {hsCodeValue.map((data) => {
+                return (
+                  <option value="expor" key={data.hs_code_format}>{data.hs_code_format}</option>
+                )
+              })}
             </select>
             <input
               type="text"
@@ -59,8 +92,9 @@ const Page2 = () => {
           <div className="min-w-fit">
             <input
               type="text"
+              value={uraianHsCode}
+              onChange={hsCodeChangeHandler}
               id="npwp"
-              value="URAIAN HS CODE"
               className="border-2 border-teal-700 rounded px-2 mb-11"
               style={{ width: 200 }}
             />
@@ -75,7 +109,8 @@ const Page2 = () => {
             <input
               type="text"
               id="npwp"
-              value="SUB HEADER HS CODE"
+              onChange={subHeaderHandler}
+              value={subHeaderHsCode}
               className="border-2 border-teal-700 rounded px-2 mb-11"
               style={{ width: 200 }}
             />
@@ -103,4 +138,4 @@ const Page2 = () => {
   );
 };
 
-export default Page2;
+export default Barang;

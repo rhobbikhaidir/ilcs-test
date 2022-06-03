@@ -13,11 +13,11 @@ const Home = () => {
   const { error: errorRegion, sendRequest: getRequestRegion } = useHttp();
   const { error: errortHarbor, sendRequest: getRequestHarbor } = useHttp();
 
-  // const {
-  //   value: npwpValue,
-  //   valueChangeHandler: npwpChangeHandler,
-  //   inputBlurHandler: npwpBlurHandler,
-  // } = useInput();
+  const {
+    value: npwpValue,
+    valueChangeHandler: npwpChangeHandler,
+    inputBlurHandler: npwpBlurHandler,
+  } = useInput();
 
   const getRegions = (data) => {
     data = data?.data?.map((d) => {
@@ -67,7 +67,7 @@ const Home = () => {
   return (
     <div className="flex flex-row m-10 h-screen">
       <div className="border border-gray-400 w-1/4 mr-6 pt-10 ">
-        <p>
+        <p className="px=10">
           <a href="/" className="text-lg text-gray-800 pl-10">
             Perusahan
           </a>
@@ -98,7 +98,9 @@ const Home = () => {
             </p>
           </div>
           <div className="flex flex-col ml-20">
-            <input
+            <input 
+              onChange={npwpChangeHandler}
+              value={npwpValue}
               type="text"
               id="npwp"
               className="border-2 border-teal-700 rounded px-2 mb-4 h-14"
@@ -116,6 +118,7 @@ const Home = () => {
               <option value="export">EXPORT</option>
               <option value="import">IMPORT</option>
             </select>
+            {errorRegion && <p>{errorRegion}</p>}
             <Autocomplete
               disablePortal
               id="combo-box-demo"
@@ -129,6 +132,8 @@ const Home = () => {
                 <TextField {...params} label="Negara Tujuan" />
               )}
             />
+            <div style={{paddingTop: '20px'}} />
+            {errortHarbor && <p>{errortHarbor}</p>}
             <Autocomplete
               key={harbors.id === undefined ? '' : harbors.id}
               disablePortal
