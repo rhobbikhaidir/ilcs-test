@@ -8,7 +8,7 @@ const initialState = {
   hsCode: [],
   finalData: [],
   idCountry: "",
-  transaction: "export",
+  transaction: "",
 };
 
 const reducer = (state = initialState, action) => {

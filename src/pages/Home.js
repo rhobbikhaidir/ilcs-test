@@ -89,7 +89,7 @@ const Home = () => {
     // console.log(idCountry)
     getDataAPIRegion();
     getDataAPIHarbor();
-  }, [idCountry]);
+  }, [idCountry, transaction]);
 
   const getAllData = (e) => {
     e.preventDefault();

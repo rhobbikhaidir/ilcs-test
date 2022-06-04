@@ -87,6 +87,8 @@ const Barang = () => {
       console.log("test", totalPrice);
     }
 
+    console.log(transactionType)
+
     hsCodeGetRequest(
       { url: "https://insw-dev.ilcs.co.id/n/barang?hs_code=01063300" },
       getHsCode
@@ -102,6 +104,7 @@ const Barang = () => {
     hasCodeFormat,
     jmlBarangVal,
     hgBarangVal,
+    transactionType
   ]);
 
   const hsCodeChangeHandler = (e) => {
@@ -162,7 +165,7 @@ const Barang = () => {
       <div className="flex flex-row m-10 h-screen">
         <SideBar onBack={backClickHandler} />
         <div className="border border-gray-400 w-3/4">
-          {transactionType === undefined ? (
+          {transactionType === "" ? (
             <h1 className="text-center my-10 text-xl text-red-600">
               Please enter value before
             </h1>
@@ -271,7 +274,7 @@ const Barang = () => {
                   style={{ width: 200 }}
                 />
               </div>
-              <div className="flex justify-end  -mt-10 flex-col  ">
+              <div className="flex justify-end flex-col  ">
                 <button
                   className="border-2 border-teal-800 px-3 rounded bg-teal-100"
                   onClick={onSubmit}
