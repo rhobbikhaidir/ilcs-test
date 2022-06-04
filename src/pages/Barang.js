@@ -271,7 +271,7 @@ const Barang = () => {
                   style={{ width: 200 }}
                 />
               </div>
-              <div className="flex justify-end mr-12 -mt-10 flex-col  ">
+              <div className="flex justify-end  -mt-10 flex-col  ">
                 <button
                   className="border-2 border-teal-800 px-3 rounded bg-teal-100"
                   onClick={onSubmit}

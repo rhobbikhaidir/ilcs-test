@@ -88,9 +88,8 @@ const Home = () => {
   useEffect(() => {
     // console.log(idCountry)
     getDataAPIRegion();
-
     getDataAPIHarbor();
-  }, [idCountry, getDataAPIRegion]);
+  }, [idCountry]);
 
   const getAllData = (e) => {
     e.preventDefault();
