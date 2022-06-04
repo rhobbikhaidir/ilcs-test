@@ -1,7 +1,7 @@
 import useInput from "../hooks/use-input";
 import React, { Fragment, useEffect, useState } from "react";
 import useHttp from "../hooks/use-http";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import SideBar from "../components/SideBar";
 import { useNavigate } from "react-router-dom";
 
@@ -10,10 +10,11 @@ const priceIsValid = (value) => value.trim().length >= 2;
 
 const Barang = () => {
   const navigate = useNavigate();
-  const transactionType = useSelector((state) => state.homeData.transaction);
+  const transactionType = useSelector((state) => state.transaction);
   const homeData = useSelector((state) => state.homeData);
+  const hsCode = useSelector((state) => state.hsCode);
+  const dispatch = useDispatch();
 
-  const [hsCodeData, setHsCodeData] = useState([]);
   const [hasCodeFormat, setHasCodeFormat] = useState(null);
   const [trfData, setTrfData] = useState({
     tarif: "",
@@ -51,7 +52,7 @@ const Barang = () => {
       setUraianHsCode(d.uraian_id);
       return null;
     });
-    setHsCodeData(res);
+    dispatch({ type: "hsCode", payload: res });
   };
 
   const getTrf = (data) => {
@@ -77,8 +78,6 @@ const Barang = () => {
   };
 
   useEffect(() => {
-    console.log(transactionType);
-
     if (trfData) {
       const totalPrice =
         +hgBarangVal +
@@ -87,10 +86,7 @@ const Barang = () => {
       setTotalHarga(totalPrice);
       console.log("test", totalPrice);
     }
-    console.log(jmlBarangVal);
-    console.log(hgBarangVal);
 
-    console.log("dari APi PPN dan Tarid", trfData);
     hsCodeGetRequest(
       { url: "https://insw-dev.ilcs.co.id/n/barang?hs_code=01063300" },
       getHsCode
@@ -102,12 +98,10 @@ const Barang = () => {
       );
     }
   }, [
-    hsCodeGetRequest,
     trfCodeGetRequest,
     hasCodeFormat,
     jmlBarangVal,
     hgBarangVal,
-    transactionType,
   ]);
 
   const hsCodeChangeHandler = (e) => {
@@ -141,7 +135,7 @@ const Barang = () => {
     const dataBarang = {
       dataHome,
       hgBarangVal,
-      hsCodeData,
+      hsCode,
       totalHarga,
       trfData,
     };
@@ -196,7 +190,7 @@ const Barang = () => {
                   className="border-2 border-teal-700 rounded px-2 mb-12 bg-white "
                   style={{ width: 200 }}
                 >
-                  {hsCodeData.map((data) => {
+                  {hsCode.map((data) => {
                     return (
                       <option value="export" key={data.hs_code_format}>
                         {data.hs_code_format}
@@ -211,7 +205,9 @@ const Barang = () => {
                   value={jmlBarangVal}
                   onBlur={jmlBlurHanlder}
                   onChange={jmlBarangChangeHandler}
-                  placeholder={jmlHasError && "minimal jumlah adalah 1"}
+                  placeholder={
+                    jmlHasError ? "minimal jumlah adalah 1" : "Jumlah Harga"
+                  }
                   className={`border-2  ${
                     jmlHasError ? "border-red-500" : "border-teal-700"
                   } rounded px-2 mb-10`}

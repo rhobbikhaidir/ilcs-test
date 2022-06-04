@@ -4,17 +4,24 @@ const initialState = {
   homeData: [],
   region: [],
   harbor: [],
+  hsCode: [],
   finalData: [],
   idCountry: "",
   transaction: "export",
 };
 
 const reducer = (state = initialState, action) => {
-  if(action.type === "submit") {
-    return{
+  if (action.type === "hsCode") {
+    return {
       ...state,
-      finalData: action.payload
-    }
+      hsCode: action.payload,
+    };
+  }
+  if (action.type === "submit") {
+    return {
+      ...state,
+      finalData: action.payload,
+    };
   }
   if (action.type === "idCountry") {
     return {

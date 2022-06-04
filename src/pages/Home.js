@@ -18,10 +18,10 @@ const Home = () => {
   const transaction = useSelector((state) => state.transaction);
   const harbors = useSelector((state) => state.harbor);
   const region = useSelector((state) => state.region);
+  const idCountry = useSelector((state) => state.idCountry)
   const dispatch = useDispatch();
 
   // get ID
-  const [kdCountry, setKdCountry] = useState("");
   const [destination, setDestination] = useState("");
 
   // GET DATA using costum Hooks
@@ -88,24 +88,27 @@ const Home = () => {
   };
 
   useEffect(() => {
+    console.log(idCountry)
     getDataAPIRegion();
-    if (kdCountry) {
-      getDataAPIHarbor(kdCountry.kd_negara);
+    if (idCountry) {
+      getDataAPIHarbor(idCountry.kd_negara);
     }
-  }, [kdCountry, destination]);
+  }, [idCountry]);
 
 
 
   const getAllData = (e) => {
     e.preventDefault();
-    const checkData = { kdCountry, destination, name, npwpValue, transaction };
-    console.log(checkData);
-    dispatch({
-      type: "homeData",
-      payload: checkData,
-    });
-    dispatch({type: 'transaction', payload: transaction})
-    navigate("/barang");
+    const checkData = { idCountry, destination, name, npwpValue};
+    console.log(checkData, transaction);
+    if(name && idCountry && npwpValue && destination) {     
+      dispatch({
+        type: "homeData",
+        payload: checkData,
+      });
+      dispatch({type: 'transaction', payload: transaction})
+      navigate("/barang");
+    }
   };
 
   return (
@@ -173,7 +176,7 @@ const Home = () => {
             <Autocomplete
               disablePortal
               id="combo-box-demo"
-              onChange={(e, value) => setKdCountry(value)}
+              onChange={(e, value) => dispatch({type: 'idCountry', payload: value})}
               isOptionEqualToValue={(option, value) =>
                 option.value === value.value
               }
@@ -202,6 +205,8 @@ const Home = () => {
           </div>
         </form>
       </div>
+
+
     </div>
   );
 };
