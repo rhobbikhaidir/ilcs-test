@@ -1,6 +1,7 @@
 import { createStore } from "redux";
 
 const initialState = {
+  destination: '',
   homeData: [],
   region: [],
   harbor: [],
@@ -11,6 +12,12 @@ const initialState = {
 };
 
 const reducer = (state = initialState, action) => {
+  if(action.type === "destination") { 
+    return {
+      ...state,
+      destination: action.payload,
+    }
+  }
   if (action.type === "hsCode") {
     return {
       ...state,

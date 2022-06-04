@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
-import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
-
-import useHttp from "../hooks/use-http";
-import useInput from "../hooks/use-input";
+import TextField from "@mui/material/TextField";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
+import useHttp from "../hooks/use-http";
+import useInput from "../hooks/use-input";
 
 const npIsValid = (value) => value.trim().length >= 16;
 const nameIsValid = (value) => value.trim() !== "";
@@ -18,11 +17,11 @@ const Home = () => {
   const transaction = useSelector((state) => state.transaction);
   const harbors = useSelector((state) => state.harbor);
   const region = useSelector((state) => state.region);
-  const idCountry = useSelector((state) => state.idCountry)
+  const idCountry = useSelector((state) => state.idCountry);
+  const destination = useSelector((state) => state.destination);
   const dispatch = useDispatch();
 
-  // get ID
-  const [destination, setDestination] = useState("");
+  const [formIsvalid, setFromIsValid] = useState(false);
 
   // GET DATA using costum Hooks
   const { error: errorRegion, sendRequest: getRequestRegion } = useHttp();
@@ -44,9 +43,6 @@ const Home = () => {
 
   const changeTransactionHandler = (e) =>
     dispatch({ type: "transaction", payload: e.target.value });
-
-
-
 
   const getRegions = (data) => {
     data = data?.data?.map((d) => {
@@ -78,36 +74,38 @@ const Home = () => {
     );
   };
 
-  const getDataAPIHarbor = (id) => {
-    getRequestHarbor(
-      {
-        url: `https://insw-dev.ilcs.co.id/n/pelabuhan?kd_negara=${id}`,
-      },
-      getHarbors
-    );
+  const getDataAPIHarbor = () => {
+    if (idCountry) {
+      getRequestHarbor(
+        {
+          url: `https://insw-dev.ilcs.co.id/n/pelabuhan?kd_negara=${idCountry.kd_negara}`,
+        },
+        getHarbors
+      );
+    }
   };
 
   useEffect(() => {
-    console.log(idCountry)
+    // console.log(idCountry)
     getDataAPIRegion();
-    if (idCountry) {
-      getDataAPIHarbor(idCountry.kd_negara);
-    }
-  }, [idCountry]);
 
-
+    getDataAPIHarbor();
+  }, [idCountry, getDataAPIRegion]);
 
   const getAllData = (e) => {
     e.preventDefault();
-    const checkData = { idCountry, destination, name, npwpValue};
+    const checkData = { idCountry, destination, name, npwpValue };
     console.log(checkData, transaction);
-    if(name && idCountry && npwpValue && destination) {     
+    if (name && idCountry && npwpValue && destination) {
+      setFromIsValid(false);
       dispatch({
         type: "homeData",
         payload: checkData,
       });
-      dispatch({type: 'transaction', payload: transaction})
+      dispatch({ type: "transaction", payload: transaction });
       navigate("/barang");
+    } else {
+      setFromIsValid(true);
     }
   };
 
@@ -176,7 +174,9 @@ const Home = () => {
             <Autocomplete
               disablePortal
               id="combo-box-demo"
-              onChange={(e, value) => dispatch({type: 'idCountry', payload: value})}
+              onChange={(e, value) =>
+                dispatch({ type: "idCountry", payload: value })
+              }
               isOptionEqualToValue={(option, value) =>
                 option.value === value.value
               }
@@ -192,7 +192,9 @@ const Home = () => {
               key={harbors.id === undefined ? "" : harbors.id}
               disablePortal
               id="combo-box-demo"
-              onChange={(e, value) => setDestination(value)}
+              onChange={(e, value) =>
+                dispatch({ type: "destination", payload: value })
+              }
               isOptionEqualToValue={(option, value) =>
                 option.value === value.value
               }
@@ -202,11 +204,14 @@ const Home = () => {
                 <TextField {...params} label="Negara Tujuan" />
               )}
             />
+            {formIsvalid && (
+              <p className="text-xl text-red-600 flex-col py-14">
+                input cannot be empty
+              </p>
+            )}
           </div>
         </form>
       </div>
-
-
     </div>
   );
 };
